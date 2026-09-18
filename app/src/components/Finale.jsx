@@ -37,6 +37,7 @@ export default function Finale({ onReplay }) {
   const full = CONFIG.letter.join("\n\n");
   const [text, setText] = useState(reduced ? full : "");
   const [sealed, setSealed] = useState(!reduced);
+  const pRef = useRef(null);
   const timer = useRef(null);
 
   useEffect(() => {
@@ -48,15 +49,17 @@ export default function Finale({ onReplay }) {
         setSealed(false);
         let i = 0;
         timer.current = setInterval(() => {
-          i += 2; setText(full.slice(0, i));
-          if (i >= full.length) clearInterval(timer.current);
+          i += 2;
+          const slice = full.slice(0, i);
+          if (pRef.current) pRef.current.textContent = slice;
+          if (i >= full.length) { clearInterval(timer.current); setText(full); }
         }, 18);
       }, 1200);
       return () => { clearInterval(iv); clearInterval(timer.current); };
     }
   }, [full]);
 
-  const skip = () => { clearInterval(timer.current); setSealed(false); setText(full); };
+  const skip = () => { clearInterval(timer.current); setSealed(false); if (pRef.current) pRef.current.textContent = full; setText(full); };
   const share = () => { location.href = `https://wa.me/?text=${encodeURIComponent(`Happy Birthday ${CONFIG.herName}! 🎂\n\n${full}`)}`; };
 
   return (
@@ -100,7 +103,7 @@ export default function Finale({ onReplay }) {
             className="glass mt-5 rounded-[24px] p-7 w-[min(92vw,480px)] max-h-[44dvh] overflow-y-auto text-left shadow-[0_24px_60px_-18px_rgba(157,23,77,.4)]"
             role="button" tabIndex={0} aria-label="Ketuk untuk lewati animasi ketikan">
             <h3 className="font-hand text-pinkdeep text-3xl mb-2">{CONFIG.finaleTitle}</h3>
-            <p className="text-ink/80 font-semibold text-[.95rem] leading-7 whitespace-pre-wrap">{text}</p>
+            <p ref={pRef} className="text-ink/80 font-semibold text-[.95rem] leading-7 whitespace-pre-wrap">{text}</p>
           </motion.div>
         )}
       </AnimatePresence>

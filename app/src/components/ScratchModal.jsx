@@ -7,16 +7,16 @@ import confetti from "canvas-confetti";
 export default function ScratchModal({ index, onClose, onUnlock }) {
   const g = CONFIG.gifts[index];
   const cvRef = useRef(null);
+  const trailEl = useRef(null);
+  const progEl = useRef(null);
   const [done, setDone] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [trail, setTrail] = useState(null);
-  const st = useRef({ scratching: false, last: null, moves: 0, unlocked: false });
+  const st = useRef({ scratching: false, last: null, moves: 0, unlocked: false, band: 0 });
 
   const finish = () => {
     if (st.current.unlocked) return;
     st.current.unlocked = true;
     stopScratch(); setMusicDuck(false);
-    setProgress(1);
+    if (progEl.current) progEl.current.style.width = "100%";
     const cv = cvRef.current;
     if (cv) { cv.style.transition = "opacity .5s"; cv.style.opacity = "0"; }
     setDone(true);
@@ -33,7 +33,7 @@ export default function ScratchModal({ index, onClose, onUnlock }) {
     setMusicDuck(true);
     startScratch();
     requestAnimationFrame(() => {
-      const r = cv.getBoundingClientRect(), dpr = devicePixelRatio || 1;
+      const r = cv.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 1.5);
       cv.width = r.width * dpr; cv.height = r.height * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       const gr = ctx.createLinearGradient(0, 0, r.width, r.height);
@@ -50,7 +50,7 @@ export default function ScratchModal({ index, onClose, onUnlock }) {
         let clear = 0, n = 0;
         for (let k = 3; k < d.length; k += 400 * 4) { n++; if (d[k] === 0) clear++; }
         const frac = clear / n;
-        setProgress(frac);
+        if (progEl.current) progEl.current.style.width = `${Math.round(frac * 100)}%`;
         const band = Math.floor(frac * 10);
         if (band > st.current.band) { st.current.band = band; scratchTick(); }
         if (frac > 0.45) finish();
@@ -71,8 +71,20 @@ export default function ScratchModal({ index, onClose, onUnlock }) {
       ctx.lineWidth = 34; ctx.lineCap = ctx.lineJoin = "round";
       ctx.beginPath(); ctx.moveTo(s.last ? s.last.x : p.x, s.last ? s.last.y : p.y); ctx.lineTo(p.x, p.y); ctx.stroke();
       s.last = p;
-      setTrail({ x: p.x, y: p.y, k: s.moves });
-      if (++s.moves % 6 === 0) check();
+      s.moves++;
+      const el = trailEl.current;
+      if (el) {
+        el.style.left = `${p.x - 10}px`;
+        el.style.top = `${p.y - 10}px`;
+        el.style.opacity = "0.9";
+        el.style.transform = "scale(.6)";
+        requestAnimationFrame(() => {
+          el.style.transition = "opacity .45s, transform .45s";
+          el.style.opacity = "0";
+          el.style.transform = "scale(1.6) translateY(-14px)";
+        });
+      }
+      if (s.moves % 12 === 0) check();
     };
     const down = (e) => {
       e.preventDefault();
@@ -104,8 +116,7 @@ export default function ScratchModal({ index, onClose, onUnlock }) {
         <p className="text-plum font-semibold text-sm mt-1 mb-2">{done ? `Seal broken — this one is yours. 🎉` : "Scratch the silver seal with your finger 👆"}</p>
         {!done && (
           <div className="h-1.5 bg-pinkdeep/10 rounded-full overflow-hidden mb-3" aria-hidden="true">
-            <motion.div className="h-full rounded-full bg-gradient-to-r from-[#ffd479] to-pinky"
-              animate={{ width: `${Math.round(progress * 100)}%` }} transition={{ type: "spring", stiffness: 200, damping: 25 }} />
+            <div ref={progEl} className="h-full rounded-full bg-gradient-to-r from-[#ffd479] to-pinky" style={{ width: "0%" }} />
           </div>
         )}
         <div className="relative w-full aspect-[1/1.05] rounded-[20px] overflow-hidden bg-gradient-to-br from-[#fff6fb] to-[#ffeef8] border-2 border-dashed border-pinky/40">
@@ -115,11 +126,8 @@ export default function ScratchModal({ index, onClose, onUnlock }) {
             <div className="text-[.92rem] text-plum font-semibold leading-relaxed">{g.reason}</div>
           </div>
           <canvas ref={cvRef} className="absolute inset-0 w-full h-full touch-none cursor-grab z-[2]" style={{ opacity: done ? 0 : 1 }} />
-          {trail && !done && (
-            <motion.span key={trail.k} className="absolute z-[3] pointer-events-none text-lg"
-              style={{ left: trail.x - 10, top: trail.y - 10 }}
-              initial={{ opacity: 0.9, scale: 0.6 }} animate={{ opacity: 0, scale: 1.6, y: -14 }}
-              transition={{ duration: 0.45 }}>✨</motion.span>
+          {!done && (
+            <span ref={trailEl} className="absolute z-[3] pointer-events-none text-lg" style={{ left: -30, top: -30, opacity: 0 }}>✨</span>
           )}
           {done && (
             <motion.div className="absolute inset-0 z-[3] bg-white pointer-events-none"

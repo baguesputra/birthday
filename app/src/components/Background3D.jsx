@@ -165,7 +165,7 @@ function FogBanks() {
   );
 }
 
-function Scene() {
+function Scene({ lite }) {
   const group = useRef(null);
   const near = useRef(null);
   const mid = useRef(null);
@@ -239,10 +239,10 @@ function Scene() {
       <points ref={near} geometry={geoNear}>
         <pointsMaterial size={0.16} vertexColors transparent opacity={0.9} sizeAttenuation depthWrite={false} />
       </points>
-      <Sparkles count={80} scale={[14, 9, 6]} size={3} speed={0.4} color="#ffd479" opacity={0.6} />
-      <Fireflies count={30} />
-      <ShootingStar />
-      {SHAPES.map((sh, i) => (
+      <Sparkles count={lite ? 0 : 80} scale={[14, 9, 6]} size={3} speed={0.4} color="#ffd479" opacity={0.6} />
+      <Fireflies count={lite ? 12 : 30} />
+      {!lite && <ShootingStar />}
+      {SHAPES.slice(0, lite ? 5 : 9).map((sh, i) => (
         <ShapeMesh key={i} sh={sh} i={i} />
       ))}
       <mesh ref={ring} position={[0, 0, 0.5]}>
@@ -256,6 +256,7 @@ function Scene() {
 
 export default function Background3D({ theme = "grid" }) {
   const reduced = typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const lite = typeof matchMedia !== "undefined" && matchMedia("(pointer: coarse)").matches;
   const tint = TINTS[theme] || TINTS.grid;
 
   if (reduced) {
@@ -278,14 +279,16 @@ export default function Background3D({ theme = "grid" }) {
       <div className="absolute inset-0 pointer-events-none" style={{
         background: "radial-gradient(560px 420px at 50% 0%,#ffe3f1 0%,transparent 70%),radial-gradient(640px 480px at 50% 110%,#ece4ff 0%,transparent 70%)",
       }} />
-      <Canvas dpr={[1, 2]} camera={{ position: [0, 0, 8], fov: 60 }} gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}>
+      <Canvas dpr={lite ? [1, 1] : [1, 2]} camera={{ position: [0, 0, 8], fov: 60 }} gl={{ antialias: !lite, alpha: true, powerPreference: "high-performance" }}>
         <fog attach="fog" args={["#fff5f9", 9, 17]} />
-        <Scene />
-        <FogBanks />
-        <EffectComposer multisampling={0}>
-          <Bloom intensity={0.85} luminanceThreshold={0.55} luminanceSmoothing={0.25} mipmapBlur />
-          <Vignette eskil={false} offset={0.22} darkness={0.55} />
-        </EffectComposer>
+        <Scene lite={lite} />
+        {!lite && <FogBanks />}
+        {!lite && (
+          <EffectComposer multisampling={0}>
+            <Bloom intensity={0.85} luminanceThreshold={0.55} luminanceSmoothing={0.25} mipmapBlur />
+            <Vignette eskil={false} offset={0.22} darkness={0.55} />
+          </EffectComposer>
+        )}
       </Canvas>
       <div className="absolute inset-0 pointer-events-none transition-all duration-1000" style={{
         background: `radial-gradient(600px 400px at 50% 20%, ${tint}26, transparent 70%)`,
