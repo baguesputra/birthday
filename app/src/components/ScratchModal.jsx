@@ -52,7 +52,7 @@ export default function ScratchModal({ index, onClose, onUnlock }) {
         if (frac > 0.45) finish();
       } catch {}
     };
-    const pos = (e) => { const r = cv.getBoundingClientRect(), p = e.touches ? e.touches[0] : e; return { x: p.clientX - r.left, y: p.clientY - r.top }; };
+    const pos = (e) => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
     const draw = (e) => {
       const s = st.current;
       if (!s.scratching || s.unlocked) return;
@@ -69,17 +69,20 @@ export default function ScratchModal({ index, onClose, onUnlock }) {
       s.last = p;
       if (++s.moves % 6 === 0) check();
     };
-    const down = (e) => { st.current.scratching = true; st.current.last = null; draw(e); };
+    const down = (e) => {
+      e.preventDefault();
+      st.current.scratching = true; st.current.last = null;
+      try { cv.setPointerCapture(e.pointerId); } catch { /* noop */ }
+      draw(e);
+    };
     const up = () => { st.current.scratching = false; st.current.last = null; };
-    cv.addEventListener("mousedown", down);
-    cv.addEventListener("touchstart", draw, { passive: false });
-    cv.addEventListener("touchmove", draw, { passive: false });
-    cv.addEventListener("touchend", up);
-    addEventListener("mousemove", (e) => { if (st.current.scratching) draw(e); });
-    addEventListener("mouseup", up);
+    cv.addEventListener("pointerdown", down);
+    cv.addEventListener("pointermove", draw, { passive: false });
+    cv.addEventListener("pointerup", up);
+    cv.addEventListener("pointercancel", up);
     const esc = (e) => { if (e.key === "Escape") onClose(); };
     addEventListener("keydown", esc);
-    return () => { stopScratch(); setMusicDuck(false); removeEventListener("mouseup", up); removeEventListener("keydown", esc); };
+    return () => { stopScratch(); setMusicDuck(false); removeEventListener("keydown", esc); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
 
