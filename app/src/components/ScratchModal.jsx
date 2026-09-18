@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { CONFIG } from "../data/gifts";
-import { winSound } from "../hooks/useAudio";
+import { winSound, startScratch, setScratchIntensity, stopScratch, scratchTick, revealSting, setMusicDuck } from "../hooks/useAudio";
 import confetti from "canvas-confetti";
 
 export default function ScratchModal({ index, onClose, onUnlock }) {
@@ -13,10 +13,11 @@ export default function ScratchModal({ index, onClose, onUnlock }) {
   const finish = () => {
     if (st.current.unlocked) return;
     st.current.unlocked = true;
+    stopScratch(); setMusicDuck(false);
     const cv = cvRef.current;
     if (cv) { cv.style.transition = "opacity .5s"; cv.style.opacity = "0"; }
     setDone(true);
-    winSound();
+    revealSting(); winSound();
     try { if (navigator.vibrate) navigator.vibrate(20); } catch { /* noop */ }
     confetti({ particleCount: 50, spread: 75, origin: { y: 0.4 }, colors: CONFIG.confettiColors });
     onUnlock(index);
@@ -24,8 +25,10 @@ export default function ScratchModal({ index, onClose, onUnlock }) {
 
   useEffect(() => {
     const cv = cvRef.current, ctx = cv.getContext("2d");
-    st.current = { scratching: false, last: null, moves: 0, unlocked: false };
+    st.current = { scratching: false, last: null, moves: 0, unlocked: false, band: 0, lastT: 0 };
     setDone(false);
+    setMusicDuck(true);
+    startScratch();
     requestAnimationFrame(() => {
       const r = cv.getBoundingClientRect(), dpr = devicePixelRatio || 1;
       cv.width = r.width * dpr; cv.height = r.height * dpr;
@@ -43,7 +46,10 @@ export default function ScratchModal({ index, onClose, onUnlock }) {
         const d = ctx.getImageData(0, 0, cv.width, cv.height).data;
         let clear = 0, n = 0;
         for (let k = 3; k < d.length; k += 400 * 4) { n++; if (d[k] === 0) clear++; }
-        if (clear / n > 0.45) finish();
+        const frac = clear / n;
+        const band = Math.floor(frac * 10);
+        if (band > st.current.band) { st.current.band = band; scratchTick(); }
+        if (frac > 0.45) finish();
       } catch {}
     };
     const pos = (e) => { const r = cv.getBoundingClientRect(), p = e.touches ? e.touches[0] : e; return { x: p.clientX - r.left, y: p.clientY - r.top }; };
@@ -51,7 +57,12 @@ export default function ScratchModal({ index, onClose, onUnlock }) {
       const s = st.current;
       if (!s.scratching || s.unlocked) return;
       e.preventDefault();
+      const now = performance.now();
       const p = pos(e);
+      const dist = s.last ? Math.hypot(p.x - s.last.x, p.y - s.last.y) : 0;
+      const dt = Math.max(1, now - (s.lastT || now));
+      setScratchIntensity(Math.min(1, dist / dt / 1.5));
+      s.lastT = now;
       ctx.globalCompositeOperation = "destination-out";
       ctx.lineWidth = 34; ctx.lineCap = ctx.lineJoin = "round";
       ctx.beginPath(); ctx.moveTo(s.last ? s.last.x : p.x, s.last ? s.last.y : p.y); ctx.lineTo(p.x, p.y); ctx.stroke();
@@ -68,7 +79,7 @@ export default function ScratchModal({ index, onClose, onUnlock }) {
     addEventListener("mouseup", up);
     const esc = (e) => { if (e.key === "Escape") onClose(); };
     addEventListener("keydown", esc);
-    return () => { removeEventListener("mouseup", up); removeEventListener("keydown", esc); };
+    return () => { stopScratch(); setMusicDuck(false); removeEventListener("mouseup", up); removeEventListener("keydown", esc); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
 

@@ -54,7 +54,7 @@ export default function App() {
   return (
     <div className="min-h-dvh">
       <Suspense fallback={<div className="fixed inset-0" style={{ background: "#fff5f9" }} aria-hidden="true" />}>
-        <Background3D />
+        <Background3D theme={screen} />
       </Suspense>
       <AnimatePresence mode="wait">
         {screen === "cover" && <Cover key="c" onOpen={() => setScreen("card")} musicStart={start} />}
