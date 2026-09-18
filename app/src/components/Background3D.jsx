@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Float } from "@react-three/drei";
+import { Float, Sparkles } from "@react-three/drei";
+import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
 import * as THREE from "three";
 
 const PALETTE = ["#ff85c2", "#ffb1d4", "#b57bee", "#ffd479", "#7ed6df", "#ff5f9e"];
-const NEAR = 90;
-const FAR = 120;
+const NEAR = 150;
+const MID = 140;
+const FAR = 110;
 
 const TINTS = { cover: "#ff85c2", card: "#ff85c2", grid: "#ff85c2", box2: "#b57bee", finale: "#ffd479" };
 
@@ -20,12 +22,36 @@ function seeded(seed) {
 }
 
 const SHAPES = [
-  { p: [-3.4, 1.6, -1.5], c: "#ff85c2", s: 1.5 },
-  { p: [3.2, 1.2, -2], c: "#b57bee", s: 1.1 },
-  { p: [-2.8, -1.8, -1], c: "#ffd479", s: 1.8 },
-  { p: [2.9, -1.5, -0.5], c: "#7ed6df", s: 1.3 },
-  { p: [0.2, 2.4, -2.5], c: "#ffb1d4", s: 1.4 },
+  { p: [-3.4, 1.6, -1.5], c: "#ff85c2", s: 1.5, k: "rock" },
+  { p: [3.2, 1.2, -2], c: "#b57bee", s: 1.1, k: "crystal" },
+  { p: [-2.8, -1.8, -1], c: "#ffd479", s: 1.8, k: "donut" },
+  { p: [2.9, -1.5, -0.5], c: "#7ed6df", s: 1.3, k: "rock" },
+  { p: [0.2, 2.4, -2.5], c: "#ffb1d4", s: 1.4, k: "crystal" },
+  { p: [-1.2, 0.4, -3], c: "#ff5f9e", s: 0.9, k: "moon" },
+  { p: [1.6, -2.4, -2.2], c: "#b57bee", s: 1.2, k: "donut" },
+  { p: [-4.2, -0.4, -2.6], c: "#7ed6df", s: 1.0, k: "star" },
+  { p: [4.1, 2.3, -3], c: "#ffd479", s: 1.3, k: "star" },
 ];
+
+function ShapeMesh({ sh, i }) {
+  const geo =
+    sh.k === "donut" ? <torusGeometry args={[0.3 * sh.s, 0.11 * sh.s, 12, 28]} /> :
+    sh.k === "crystal" ? <octahedronGeometry args={[0.34 * sh.s, 0]} /> :
+    sh.k === "moon" ? <sphereGeometry args={[0.32 * sh.s, 20, 20]} /> :
+    sh.k === "star" ? <tetrahedronGeometry args={[0.4 * sh.s, 0]} /> :
+      <icosahedronGeometry args={[0.32 * sh.s, 0]} />;
+  return (
+    <Float key={i} speed={1.9} rotationIntensity={0.7} floatIntensity={1.6}>
+      <mesh position={sh.p}>
+        {geo}
+        <meshStandardMaterial
+          color={sh.c} transparent opacity={0.55} roughness={0.25}
+          emissive={sh.c} emissiveIntensity={sh.k === "moon" ? 0.55 : 0.25}
+        />
+      </mesh>
+    </Float>
+  );
+}
 
 function makeCloud(n, seed, spreadX, spreadY, zMin, zMax) {
   const rand = seeded(seed);
@@ -45,10 +71,108 @@ function makeCloud(n, seed, spreadX, spreadY, zMin, zMax) {
   return g;
 }
 
+function Fireflies({ count = 30 }) {
+  const refs = useRef([]);
+  const data = useMemo(() => {
+    const rand = seeded(99);
+    return Array.from({ length: count }, () => ({
+      x: (rand() - 0.5) * 11,
+      y: (rand() - 0.5) * 7,
+      z: -2 + rand() * 3,
+      sp: 0.4 + rand() * 0.9,
+      ph: rand() * Math.PI * 2,
+      am: 0.3 + rand() * 0.5,
+    }));
+  }, [count]);
+  useFrame(({ clock }) => {
+    const t = clock.elapsedTime;
+    data.forEach((f, i) => {
+      const m = refs.current[i];
+      if (!m) return;
+      m.position.set(
+        f.x + Math.sin(t * f.sp + f.ph) * f.am,
+        f.y + Math.cos(t * f.sp * 0.8 + f.ph) * f.am,
+        f.z
+      );
+    });
+  });
+  return (
+    <group>
+      {data.map((f, i) => (
+        <mesh key={i} ref={(m) => { refs.current[i] = m; }} position={[f.x, f.y, f.z]}>
+          <sphereGeometry args={[0.055, 8, 8]} />
+          <meshBasicMaterial color="#ffe9a8" transparent opacity={0.95} depthWrite={false} />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+function ShootingStar() {
+  const ref = useRef(null);
+  const st = useRef({ next: 2.5, x: 0, y: 0, vx: 0, vy: 0, life: 0 });
+  useFrame(({ clock }, d) => {
+    const t = clock.elapsedTime;
+    const s = st.current;
+    const m = ref.current;
+    if (!m) return;
+    if (s.life <= 0) {
+      m.visible = false;
+      if (t > s.next) {
+        s.x = 2 + Math.random() * 3;
+        s.y = 2 + Math.random() * 2;
+        s.vx = -(6 + Math.random() * 3);
+        s.vy = -(2.5 + Math.random() * 1.5);
+        s.life = 0.9;
+        m.visible = true;
+      }
+      return;
+    }
+    s.life -= d;
+    s.x += s.vx * d;
+    s.y += s.vy * d;
+    m.position.set(s.x, s.y, -1);
+    m.material.opacity = Math.max(0, Math.min(1, s.life * 2));
+    if (s.life <= 0) s.next = t + 4 + Math.random() * 3;
+  });
+  return (
+    <mesh ref={ref} visible={false}>
+      <sphereGeometry args={[0.09, 10, 10]} />
+      <meshBasicMaterial color="#ffffff" transparent opacity={0} />
+    </mesh>
+  );
+}
+
+function FogBanks() {
+  const f1 = useRef(null);
+  const f2 = useRef(null);
+  const f3 = useRef(null);
+  useFrame(({ clock }) => {
+    const t = clock.elapsedTime;
+    if (f1.current) f1.current.position.x = Math.sin(t * 0.07) * 2.2;
+    if (f2.current) f2.current.position.x = Math.cos(t * 0.05) * 2.6;
+    if (f3.current) f3.current.position.x = Math.sin(t * 0.04 + 2) * 3;
+  });
+  const mat = (o) => (
+    <meshBasicMaterial color="#ffc7e3" transparent opacity={o} depthWrite={false} />
+  );
+  return (
+    <group>
+      <mesh ref={f1} position={[0, 1.4, -6]}>{<planeGeometry args={[22, 7]} />}{mat(0.10)}</mesh>
+      <mesh ref={f2} position={[0, -1.6, -7]}>{<planeGeometry args={[24, 8]} />}{mat(0.08)}</mesh>
+      <mesh ref={f3} position={[0, 0.2, -8]}>{<planeGeometry args={[26, 10]} />}{mat(0.06)}</mesh>
+    </group>
+  );
+}
+
 function Scene() {
   const group = useRef(null);
   const near = useRef(null);
+  const mid = useRef(null);
   const far = useRef(null);
+  const ring = useRef(null);
+  const key = useRef(null);
+  const rim = useRef(null);
   const burst = useRef(0);
   const px = useRef(0);
   const py = useRef(0);
@@ -65,9 +189,10 @@ function Scene() {
   }, []);
 
   const geoNear = useMemo(() => makeCloud(NEAR, 7, 12, 8, -4, 2), []);
+  const geoMid = useMemo(() => makeCloud(MID, 13, 14, 9, -6, -1), []);
   const geoFar = useMemo(() => makeCloud(FAR, 21, 16, 11, -8, -3), []);
 
-  useEffect(() => () => { geoNear.dispose(); geoFar.dispose(); }, [geoNear, geoFar]);
+  useEffect(() => () => { geoNear.dispose(); geoMid.dispose(); geoFar.dispose(); }, [geoNear, geoMid, geoFar]);
 
   useFrame(({ camera, clock }, rawDt) => {
     const d = Math.min(rawDt, 0.05);
@@ -79,7 +204,17 @@ function Scene() {
     if (burst.current > 0) burst.current = Math.max(0, burst.current - d * 1.5);
     group.current.scale.setScalar(damp(group.current.scale.x, 1 + burst.current * 0.35, 6));
     near.current.rotation.z = t * 0.03;
-    far.current.rotation.z = -t * 0.015;
+    mid.current.rotation.z = -t * 0.02;
+    far.current.rotation.z = -t * 0.012;
+    const beat = (t * 90 / 60) % 1;
+    const pulse = Math.pow(1 - beat, 2.2);
+    if (key.current) key.current.intensity = 8 + pulse * 9;
+    if (rim.current) rim.current.intensity = 7 + pulse * 6;
+    if (ring.current) {
+      const r = 1 + (1 - burst.current) * 5;
+      ring.current.scale.setScalar(r);
+      ring.current.material.opacity = burst.current * 0.7;
+    }
     const p = Math.min(t / 1.4, 1);
     const e = 1 - Math.pow(1 - p, 3);
     const zt = 8 - (8 - 3.5) * e;
@@ -90,22 +225,32 @@ function Scene() {
   });
 
   return (
-    <group ref={group}>
+    <>
+      <ambientLight intensity={0.7} />
+      <pointLight ref={key} position={[4, 3, 4]} intensity={8} color="#ff85c2" />
+      <pointLight ref={rim} position={[-4, -2, 3]} intensity={7} color="#b57bee" />
+      <group ref={group}>
       <points ref={far} geometry={geoFar}>
         <pointsMaterial size={0.09} vertexColors transparent opacity={0.5} sizeAttenuation depthWrite={false} />
+      </points>
+      <points ref={mid} geometry={geoMid}>
+        <pointsMaterial size={0.12} vertexColors transparent opacity={0.7} sizeAttenuation depthWrite={false} />
       </points>
       <points ref={near} geometry={geoNear}>
         <pointsMaterial size={0.16} vertexColors transparent opacity={0.9} sizeAttenuation depthWrite={false} />
       </points>
+      <Sparkles count={80} scale={[14, 9, 6]} size={3} speed={0.4} color="#ffd479" opacity={0.6} />
+      <Fireflies count={30} />
+      <ShootingStar />
       {SHAPES.map((sh, i) => (
-        <Float key={i} speed={1.6} rotationIntensity={0.5} floatIntensity={1.4}>
-          <mesh position={sh.p}>
-            <icosahedronGeometry args={[0.32 * sh.s, 0]} />
-            <meshStandardMaterial color={sh.c} transparent opacity={0.5} roughness={0.3} />
-          </mesh>
-        </Float>
+        <ShapeMesh key={i} sh={sh} i={i} />
       ))}
-    </group>
+      <mesh ref={ring} position={[0, 0, 0.5]}>
+        <ringGeometry args={[0.9, 1, 48]} />
+        <meshBasicMaterial color="#ffffff" transparent opacity={0} side={THREE.DoubleSide} depthWrite={false} />
+      </mesh>
+      </group>
+    </>
   );
 }
 
@@ -133,12 +278,14 @@ export default function Background3D({ theme = "grid" }) {
       <div className="absolute inset-0 pointer-events-none" style={{
         background: "radial-gradient(560px 420px at 50% 0%,#ffe3f1 0%,transparent 70%),radial-gradient(640px 480px at 50% 110%,#ece4ff 0%,transparent 70%)",
       }} />
-      <Canvas dpr={[1, 1.25]} performance={{ min: 0.5 }} camera={{ position: [0, 0, 8], fov: 60 }} gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}>
+      <Canvas dpr={[1, 2]} camera={{ position: [0, 0, 8], fov: 60 }} gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}>
         <fog attach="fog" args={["#fff5f9", 9, 17]} />
-        <ambientLight intensity={0.7} />
-        <pointLight position={[4, 3, 4]} intensity={8} color="#ff85c2" />
-        <pointLight position={[-4, -2, 3]} intensity={7} color="#b57bee" />
         <Scene />
+        <FogBanks />
+        <EffectComposer multisampling={0}>
+          <Bloom intensity={0.85} luminanceThreshold={0.55} luminanceSmoothing={0.25} mipmapBlur />
+          <Vignette eskil={false} offset={0.22} darkness={0.55} />
+        </EffectComposer>
       </Canvas>
       <div className="absolute inset-0 pointer-events-none transition-all duration-1000" style={{
         background: `radial-gradient(600px 400px at 50% 20%, ${tint}26, transparent 70%)`,
@@ -149,3 +296,4 @@ export default function Background3D({ theme = "grid" }) {
     </div>
   );
 }
+

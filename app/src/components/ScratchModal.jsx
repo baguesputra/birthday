@@ -8,12 +8,15 @@ export default function ScratchModal({ index, onClose, onUnlock }) {
   const g = CONFIG.gifts[index];
   const cvRef = useRef(null);
   const [done, setDone] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [trail, setTrail] = useState(null);
   const st = useRef({ scratching: false, last: null, moves: 0, unlocked: false });
 
   const finish = () => {
     if (st.current.unlocked) return;
     st.current.unlocked = true;
     stopScratch(); setMusicDuck(false);
+    setProgress(1);
     const cv = cvRef.current;
     if (cv) { cv.style.transition = "opacity .5s"; cv.style.opacity = "0"; }
     setDone(true);
@@ -47,6 +50,7 @@ export default function ScratchModal({ index, onClose, onUnlock }) {
         let clear = 0, n = 0;
         for (let k = 3; k < d.length; k += 400 * 4) { n++; if (d[k] === 0) clear++; }
         const frac = clear / n;
+        setProgress(frac);
         const band = Math.floor(frac * 10);
         if (band > st.current.band) { st.current.band = band; scratchTick(); }
         if (frac > 0.45) finish();
@@ -67,6 +71,7 @@ export default function ScratchModal({ index, onClose, onUnlock }) {
       ctx.lineWidth = 34; ctx.lineCap = ctx.lineJoin = "round";
       ctx.beginPath(); ctx.moveTo(s.last ? s.last.x : p.x, s.last ? s.last.y : p.y); ctx.lineTo(p.x, p.y); ctx.stroke();
       s.last = p;
+      setTrail({ x: p.x, y: p.y, k: s.moves });
       if (++s.moves % 6 === 0) check();
     };
     const down = (e) => {
@@ -96,7 +101,13 @@ export default function ScratchModal({ index, onClose, onUnlock }) {
           className="absolute top-3 right-3 w-11 h-11 rounded-full bg-pinkdeep/5 text-pinkdeep font-bold hover:bg-pinkdeep/10">✕</button>
         <p className="eyebrow">Keepsake No. {index + 1}</p>
         <h3 className="font-display font-bold text-ink text-2xl mt-1 pr-10">{g.title}</h3>
-        <p className="text-plum font-semibold text-sm mt-1 mb-4">{done ? `Seal broken — this one is yours. 🎉` : "Scratch the silver seal with your finger 👆"}</p>
+        <p className="text-plum font-semibold text-sm mt-1 mb-2">{done ? `Seal broken — this one is yours. 🎉` : "Scratch the silver seal with your finger 👆"}</p>
+        {!done && (
+          <div className="h-1.5 bg-pinkdeep/10 rounded-full overflow-hidden mb-3" aria-hidden="true">
+            <motion.div className="h-full rounded-full bg-gradient-to-r from-[#ffd479] to-pinky"
+              animate={{ width: `${Math.round(progress * 100)}%` }} transition={{ type: "spring", stiffness: 200, damping: 25 }} />
+          </div>
+        )}
         <div className="relative w-full aspect-[1/1.05] rounded-[20px] overflow-hidden bg-gradient-to-br from-[#fff6fb] to-[#ffeef8] border-2 border-dashed border-pinky/40">
           <div className="absolute inset-0 flex flex-col items-center justify-center p-5 text-center gap-2">
             <div className="text-6xl">{g.emoji}</div>
@@ -104,6 +115,16 @@ export default function ScratchModal({ index, onClose, onUnlock }) {
             <div className="text-[.92rem] text-plum font-semibold leading-relaxed">{g.reason}</div>
           </div>
           <canvas ref={cvRef} className="absolute inset-0 w-full h-full touch-none cursor-grab z-[2]" style={{ opacity: done ? 0 : 1 }} />
+          {trail && !done && (
+            <motion.span key={trail.k} className="absolute z-[3] pointer-events-none text-lg"
+              style={{ left: trail.x - 10, top: trail.y - 10 }}
+              initial={{ opacity: 0.9, scale: 0.6 }} animate={{ opacity: 0, scale: 1.6, y: -14 }}
+              transition={{ duration: 0.45 }}>✨</motion.span>
+          )}
+          {done && (
+            <motion.div className="absolute inset-0 z-[3] bg-white pointer-events-none"
+              initial={{ opacity: 0.85 }} animate={{ opacity: 0 }} transition={{ duration: 0.6 }} />
+          )}
         </div>
         <div className="text-center mt-3 flex gap-2 justify-center items-center">
           {!done && <button onClick={finish} className="btn-ghost">Open directly</button>}

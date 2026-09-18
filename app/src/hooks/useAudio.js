@@ -172,6 +172,8 @@ export function useMusic(muted, setMuted) {
         const chord = CHORDS[b];
         pad(c, out, chord, t, BAR + 0.5);
         if (b % 2 === 0) shimmer(c, out, chord[3] * 2, t + BAR * 0.25, BAR * 0.5);
+        pluck(c, out, chord[0] / 2, t, BAR * 0.9, 0.09);
+        pluck(c, out, chord[0], t + BEAT * 4, BEAT * 3, 0.05);
       }
       const seq = MELODY[(bar * 8 + beat) % MELODY.length];
       pluck(c, out, seq, t);
