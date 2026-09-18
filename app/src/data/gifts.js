@@ -10,7 +10,7 @@ export const CONFIG = {
     { emoji: "📖", title: "Buku catatan", reason: "Karena perjalanan kita nanti akan punya banyak cerita. Ada rencana, impian, hal-hal kecil yang ingin diingat, bahkan mungkin daftar keinginan yang ingin kita wujudkan bersama. Jadi, biarkan halaman pertama menjadi awal dari banyak cerita berikutnya." },
   ],
   box2: { answer: "LAILI", snacks: ["Lays", "Aqua", "Indomie", "Lemonilo", "Ichi Ocha"] },
-  finaleTitle: "Untuk Laili 🤍",
+  finaleTitle: "Untuk Sayang 🤍",
   letter: [
     "Selamat ulang tahun.",
     "Hari ini adalah tentang kamu, tentang bertambahnya satu tahun dalam perjalanan hidupmu, dan tentang semua hal baik yang semoga datang setelahnya.",
@@ -21,7 +21,7 @@ export const CONFIG = {
     "Semoga apa pun yang sedang kamu perjuangkan hari ini, perlahan menemukan jalannya.",
     "Dan untuk perjalanan kita ke depannya...\nAku tidak bisa menjanjikan semuanya akan selalu mudah. Tapi aku berharap, ketika nanti ada hari yang menyenangkan, kita bisa menikmatinya bersama.",
     "Dan ketika ada hari yang berat, kita bisa saling menguatkan dan melewatinya bersama.",
-    "Selamat bertambah usia, Laili.\nTerima kasih sudah menjadi bagian dari cerita hidupku sampai hari ini.",
+    "Selamat bertambah usia, sayang.\nTerima kasih sudah menjadi bagian dari cerita hidupku sampai hari ini.",
     "Semoga tahun ini menjadi awal dari banyak hal baik. Dan semoga, di antara semua hal baik yang akan datang nanti, aku masih diberi kesempatan untuk menjadi bagian di dalamnya. 🤍",
     "Selamat ulang tahun, calon istriku.\n— Bagues",
   ],
