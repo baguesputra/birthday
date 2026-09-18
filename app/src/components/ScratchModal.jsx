@@ -74,25 +74,26 @@ export default function ScratchModal({ index, onClose, onUnlock }) {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-20 flex items-center justify-center p-4 bg-[rgba(90,40,70,.45)] backdrop-blur-md" role="dialog" aria-modal="true">
-      <motion.div initial={{ scale: 0.96, y: 10, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }}
-        className="bg-white/95 rounded-[28px] p-[22px] w-[min(94vw,400px)] max-h-[92dvh] overflow-y-auto shadow-2xl relative border border-white/60">
+      className="fixed inset-0 z-20 flex items-center justify-center p-4 bg-[#2B2135]/45 backdrop-blur-md" role="dialog" aria-modal="true">
+      <motion.div initial={{ scale: 0.94, y: 16, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 260, damping: 24 }}
+        className="glass rounded-[28px] p-6 w-[min(94vw,400px)] max-h-[92dvh] overflow-y-auto relative">
         <button onClick={onClose} aria-label="Tutup"
-          className="absolute top-2.5 right-3.5 w-11 h-11 rounded-full bg-[#ffeef7] text-pinkdeep font-bold">✕</button>
-        <h3 className="font-display text-xl text-pinkdeep mb-1 pr-10">Gift #{index + 1} — {g.title}</h3>
-        <p className="text-plum font-semibold text-sm mb-3">{done ? `Yay! Gift #${index + 1} unlocked! 🎉` : "Gosok panel silver dengan jarimu 👆"}</p>
-        <div className="relative w-full aspect-[1/1.05] rounded-[20px] overflow-hidden bg-gradient-to-br from-[#fff6fb] to-[#ffeef8] border-[3px] border-dashed border-[#ffb1d4]">
-          <div className="absolute inset-0 flex flex-col items-center justify-center p-[18px] text-center gap-2">
+          className="absolute top-3 right-3 w-11 h-11 rounded-full bg-pinkdeep/5 text-pinkdeep font-bold hover:bg-pinkdeep/10">✕</button>
+        <p className="eyebrow">Keepsake No. {index + 1}</p>
+        <h3 className="font-display font-bold text-ink text-2xl mt-1 pr-10">{g.title}</h3>
+        <p className="text-plum font-semibold text-sm mt-1 mb-4">{done ? `Seal broken — this one is yours. 🎉` : "Scratch the silver seal with your finger 👆"}</p>
+        <div className="relative w-full aspect-[1/1.05] rounded-[20px] overflow-hidden bg-gradient-to-br from-[#fff6fb] to-[#ffeef8] border-2 border-dashed border-pinky/40">
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-5 text-center gap-2">
             <div className="text-6xl">{g.emoji}</div>
-            <div className="font-display text-xl text-[#e0559a]">{g.title}</div>
-            <div className="text-[.92rem] text-plum font-semibold">{g.reason}</div>
+            <div className="font-display font-bold text-xl text-pinky">{g.title}</div>
+            <div className="text-[.92rem] text-plum font-semibold leading-relaxed">{g.reason}</div>
           </div>
           <canvas ref={cvRef} className="absolute inset-0 w-full h-full touch-none cursor-grab z-[2]" style={{ opacity: done ? 0 : 1 }} />
         </div>
-        <div className="text-center mt-2 flex gap-2 justify-center">
-          {!done && <button onClick={finish} className="underline text-pinkdeep font-bold min-h-[44px] px-4">Buka langsung</button>}
-          <button onClick={onClose} disabled={!done}
-            className="font-display px-6 py-2 rounded-full text-white bg-gradient-to-br from-[#ff85c2] to-[#ff5f9e] disabled:opacity-50">Yay! ✓</button>
+        <div className="text-center mt-3 flex gap-2 justify-center items-center">
+          {!done && <button onClick={finish} className="btn-ghost">Open directly</button>}
+          <button onClick={onClose} disabled={!done} className="btn-love !mt-0 !px-7 !py-2.5 !text-base">Keep it ✓</button>
         </div>
       </motion.div>
     </motion.div>

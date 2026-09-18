@@ -4,15 +4,18 @@ import { CONFIG } from "../data/gifts";
 
 export default function CardIntro({ onStart }) {
   return (
-    <motion.section key="card" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-10 flex flex-col items-center justify-center p-5 text-center max-w-[640px] mx-auto">
-      <div className="text-6xl">💌</div>
-      <h1 className="font-display text-[#e0559a] leading-tight mt-2" style={{ fontSize: "clamp(2.2rem,9vw,4rem)", textShadow: "0 2px 24px rgba(217,79,140,.18)" }}>
-        Happy Birthday,<br />{CONFIG.herName}! 🎂
+    <motion.section key="card"
+      initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      className="stage">
+      <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}
+        className="glass rounded-full w-20 h-20 flex items-center justify-center text-4xl">💌</motion.div>
+      <p className="eyebrow mt-6">02 · Six keepsakes</p>
+      <h1 className="font-display font-bold text-ink leading-[1.05] mt-3" style={{ fontSize: "clamp(2.2rem,8vw,3.6rem)" }}>
+        Happy birthday,<br /><em className="text-pinky">{CONFIG.herName}.</em>
       </h1>
-      <p className="text-plum font-semibold mt-2 max-w-[42ch]">I made 6 little gifts for you — scratch them all ✨</p>
-      <button onClick={() => { popSound(); onStart(); }}
-        className="mt-8 font-display text-xl px-9 py-3.5 rounded-full text-white bg-gradient-to-br from-[#ff85c2] to-[#ff5f9e] shadow-[0_8px_20px_rgba(255,95,158,.4)] active:scale-95 transition-transform">See my gifts 🎈</button>
+      <p className="text-plum font-semibold mt-3 max-w-[40ch]">Six small things I chose for you — scratch each seal to reveal why it&apos;s yours.</p>
+      <button onClick={() => { popSound(); onStart(); }} className="btn-love mt-8">See my gifts 🎈</button>
     </motion.section>
   );
 }

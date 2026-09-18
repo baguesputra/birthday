@@ -109,10 +109,10 @@ export default function Background3D() {
       <div className="absolute inset-0 pointer-events-none" style={{
         background: "radial-gradient(560px 420px at 50% 0%,#ffe3f1 0%,transparent 70%),radial-gradient(640px 480px at 50% 110%,#ece4ff 0%,transparent 70%)",
       }} />
-      <Canvas dpr={[1, 1.75]} camera={{ position: [0, 0, 8], fov: 60 }} gl={{ antialias: true, alpha: true }}>
-        <ambientLight intensity={0.9} />
-        <pointLight position={[4, 3, 4]} intensity={12} color="#ff85c2" />
-        <pointLight position={[-4, -2, 3]} intensity={10} color="#b57bee" />
+      <Canvas dpr={[1, 1.5]} camera={{ position: [0, 0, 8], fov: 60 }} gl={{ antialias: true, alpha: true }}>
+        <ambientLight intensity={0.7} />
+        <pointLight position={[4, 3, 4]} intensity={8} color="#ff85c2" />
+        <pointLight position={[-4, -2, 3]} intensity={7} color="#b57bee" />
         <Scene />
       </Canvas>
     </div>

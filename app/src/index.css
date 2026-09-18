@@ -3,4 +3,14 @@
 @tailwind utilities;
 
 html, body, #root { height: 100%; }
-body { font-family: Quicksand, sans-serif; background: #fff5f9; -webkit-tap-highlight-color: transparent; }
+body { font-family: Quicksand, sans-serif; background: #FFF5F9; color: #2B2135; -webkit-tap-highlight-color: transparent; }
+::selection { background: #D94F8C; color: #fff; }
+button:focus-visible, [tabindex]:focus-visible { outline: 3px solid #D94F8C; outline-offset: 3px; border-radius: 12px; }
+
+@layer components {
+  .eyebrow { @apply text-[11px] font-bold tracking-[0.32em] uppercase text-pinkdeep/70; }
+  .stage { @apply fixed inset-0 z-10 flex flex-col items-center justify-center p-5 text-center max-w-[640px] mx-auto; }
+  .glass { @apply bg-white/80 backdrop-blur-xl border border-white/70 shadow-card; }
+  .btn-love { @apply font-display font-bold text-lg px-9 py-3.5 rounded-full text-white bg-gradient-to-br from-[#ff85c2] to-[#D94F8C] shadow-pop active:scale-[.96] transition-transform hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0; }
+  .btn-ghost { @apply font-bold text-pinkdeep underline underline-offset-4 min-h-[44px] px-4 hover:text-pinky; }
+}

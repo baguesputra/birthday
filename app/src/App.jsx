@@ -1,5 +1,5 @@
 import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import Cover from "./components/Cover";
 import CardIntro from "./components/CardIntro";
 import GiftGrid from "./components/GiftGrid";
@@ -72,13 +72,14 @@ export default function App() {
       </AnimatePresence>
       <AnimatePresence>
         {toast && (
-          <div className="fixed left-1/2 bottom-6 -translate-x-1/2 z-[60] bg-pinkdeep text-white font-bold px-5 py-3 rounded-full shadow-lg max-w-[90vw]" role="status">{toast}</div>
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
+            className="fixed left-1/2 bottom-6 -translate-x-1/2 z-[60] glass !rounded-full text-ink font-bold px-5 py-3 max-w-[90vw]" role="status">{toast}</motion.div>
         )}
       </AnimatePresence>
       <button onClick={toggle} aria-label="Musik on/off" aria-pressed={String(!muted)}
-        className="fixed top-[14px] right-[70px] z-50 w-12 h-12 rounded-full bg-white/90 shadow flex items-center justify-center text-xl active:scale-90">{muted ? "🔇" : "🎵"}</button>
+        className="glass fixed top-[14px] right-[70px] z-50 w-12 h-12 !rounded-full flex items-center justify-center text-xl active:scale-90">{muted ? "🔇" : "🎵"}</button>
       <button onClick={fullscreen} aria-label="Layar penuh"
-        className="fixed top-[14px] right-[14px] z-50 w-12 h-12 rounded-full bg-white/90 shadow flex items-center justify-center text-xl active:scale-90">⛶</button>
+        className="glass fixed top-[14px] right-[14px] z-50 w-12 h-12 !rounded-full flex items-center justify-center text-xl active:scale-90">⛶</button>
     </div>
   );
 }

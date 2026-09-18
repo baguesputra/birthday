@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { CONFIG } from "../data/gifts";
 import { fanfare } from "../hooks/useAudio";
 import confetti from "canvas-confetti";
+import { Stepper } from "./GiftGrid";
 
 const reduced = typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -29,19 +30,28 @@ export default function Finale({ onReplay }) {
   const share = () => { location.href = `https://wa.me/?text=${encodeURIComponent(`Happy Birthday ${CONFIG.herName}! 🎂\n\n${full}`)}`; };
 
   return (
-    <motion.section key="finale" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-      className="fixed inset-0 z-10 flex flex-col items-center justify-center p-5 text-center max-w-[640px] mx-auto overflow-y-auto">
-      <button aria-label="Ketuk untuk ledakan hati" className="text-5xl mb-2"
-        onClick={(e) => confetti({ particleCount: 30, spread: 60, origin: { x: e.clientX / innerWidth, y: e.clientY / innerHeight }, colors: CONFIG.confettiColors })}>🎉💖🎉</button>
-      <h1 className="font-display text-[#e0559a]" style={{ fontSize: "clamp(1.8rem,7vw,3rem)" }}>You found them ALL!</h1>
-      <div onClick={skip} className="mt-4 bg-white rounded-[22px] p-6 w-[min(92vw,480px)] max-h-[44dvh] overflow-y-auto text-left shadow-[0_10px_30px_rgba(224,85,154,.18)] border-[3px] border-[#ffc7e0]" role="button" tabIndex={0} aria-label="Ketuk untuk lewati animasi ketikan">
+    <motion.section key="finale"
+      initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      className="stage overflow-y-auto">
+      <Stepper active={3} />
+      <motion.button aria-label="Ketuk untuk ledakan hati" className="text-5xl"
+        initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.2, type: "spring", stiffness: 220, damping: 14 }}
+        whileTap={{ scale: 1.25 }}
+        onClick={(e) => confetti({ particleCount: 30, spread: 60, origin: { x: e.clientX / innerWidth, y: e.clientY / innerHeight }, colors: CONFIG.confettiColors })}>🎉💖🎉</motion.button>
+      <p className="eyebrow mt-3">The letter · For Laili</p>
+      <h1 className="font-display font-bold text-ink leading-[1.05]" style={{ fontSize: "clamp(2rem,7vw,3.2rem)" }}>
+        You found them <em className="text-pinky">all.</em>
+      </h1>
+      <div onClick={skip} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") skip(); }}
+        className="glass mt-5 rounded-[24px] p-7 w-[min(92vw,480px)] max-h-[44dvh] overflow-y-auto text-left" role="button" tabIndex={0} aria-label="Ketuk untuk lewati animasi ketikan">
         <h3 className="font-hand text-pinkdeep text-3xl mb-2">{CONFIG.finaleTitle}</h3>
-        <p className="text-plum font-semibold text-[.95rem] leading-7 whitespace-pre-wrap">{text}</p>
+        <p className="text-ink/80 font-semibold text-[.95rem] leading-7 whitespace-pre-wrap">{text}</p>
       </div>
-      <div className="text-[#b98aa3] text-xs font-bold mt-2 opacity-70">tap the letter to skip typing ✏️</div>
-      <div className="mt-4 flex gap-2">
-        <button onClick={share} className="font-display px-6 py-2 rounded-full text-white bg-gradient-to-br from-[#ff85c2] to-[#ff5f9e]">Share 💌</button>
-        <button onClick={onReplay} className="font-display px-6 py-2 rounded-full text-white bg-gradient-to-br from-[#ff85c2] to-[#ff5f9e]">Replay ♡</button>
+      <div className="text-plum/70 text-xs font-bold mt-2">tap the letter to skip typing ✏️</div>
+      <div className="mt-4 flex gap-3 flex-wrap justify-center">
+        <button onClick={share} className="btn-love !mt-0 !px-7 !py-2.5 !text-base">Share 💌</button>
+        <button onClick={onReplay} className="font-display font-bold px-7 py-2.5 rounded-full border-2 border-pinkdeep/20 text-pinkdeep hover:border-pinky hover:text-pinky transition-colors">Replay ♡</button>
       </div>
     </motion.section>
   );
