@@ -1,6 +1,14 @@
 import { useState } from "react";
 import { motion, AnimatePresence, useSpring } from "framer-motion";
 import { useEffect } from "react";
+import { 
+  GiftIcon, 
+  HeartIcon, 
+  ShoppingBagIcon, 
+  UserCircleIcon, 
+  BookOpenIcon,
+  CheckCircleIcon
+} from "@heroicons/react/24/solid";
 import { CONFIG } from "../data/gifts";
 
 const STEPS = ["cover", "keepsakes", "box 2", "letter"];
@@ -21,9 +29,24 @@ export function Stepper({ active }) {
   );
 }
 
+// Icon mapping for gifts - using index-based mapping with available Heroicons
+const GIFT_ICONS = [
+  GiftIcon,      // 🌷 - Bunga dalam tabung (gift box for flower in tube)
+  HeartIcon,     // 🤍 - Selimut lembut (heart for blanket)
+  ShoppingBagIcon, // 👜 - Pouch makeup
+  UserCircleIcon,  // 🤍 - Mukena (person for religious garment)
+  UserCircleIcon,  // 🧕 - Kerudung (person for headscarf)
+  BookOpenIcon,    // 📖 - Buku catatan
+];
+
+function getGiftIcon(index) {
+  const IconComponent = GIFT_ICONS[index] || GiftIcon;
+  return <IconComponent className="h-6 w-6 text-ink" />;
+}
+
 function BurstBits({ fire }) {
   if (!fire) return null;
-  const bits = ["✨", "💖", "✦", "💕", "⭐", "✨"];
+  const bits = ["*", "+", "x", "✦", "✧", "✨"];
   return (
     <>
       {bits.map((b, i) => {
@@ -82,7 +105,9 @@ function GiftBox({ g, i, open, onOpen }) {
         ${open ? "!bg-[#FFFBEB] border-[#ffd479]/70 cursor-default" : "cursor-pointer"}`}>
       <BurstBits fire={revealed && !open} />
       <span className="eyebrow !text-[9px] self-start">No. {i + 1}</span>
-      {open && <span className="absolute top-2 right-2.5" aria-hidden="true">✅</span>}
+      {open && <span className="absolute top-2 right-2.5" aria-hidden="true">
+        <CheckCircleIcon className="h-4 w-4 text-green-500" />
+      </span>}
       <motion.div
         animate={open ? {} : { y: [0, -5, 0] }}
         transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: i * 0.4 }}>
@@ -95,7 +120,7 @@ function GiftBox({ g, i, open, onOpen }) {
               initial={false}
               animate={revealed ? { scale: 1, y: -6, opacity: 1 } : { scale: 0.4, y: 14, opacity: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 15 }}>
-              {g.emoji}
+              {getGiftIcon(i)}
             </motion.div>
           </div>
         </div>

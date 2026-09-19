@@ -9,7 +9,7 @@ const NEAR = 150;
 const MID = 140;
 const FAR = 110;
 
-const TINTS = { cover: "#ff85c2", card: "#ff85c2", grid: "#ff85c2", box2: "#b57bee", finale: "#ffd479" };
+const TINTS = { cover: "#ff85c2", card: "#ff85c2", grid: "#ff85c2", finale: "#ffd479" };
 
 function seeded(seed) {
   let a = seed;
@@ -179,13 +179,70 @@ function Scene({ lite }) {
 
   useEffect(() => {
     const fire = () => { burst.current = 1; };
-    const move = (e) => {
-      px.current = (e.clientX / innerWidth) * 2 - 1;
-      py.current = -((e.clientY / innerHeight) * 2 - 1);
+    let gyroPx = 0, gyroPy = 0, hasGyro = false;
+    const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+    const onPointerMove = (e) => {
+      px.current = clamp((e.clientX / innerWidth) * 2 - 1 + gyroPx * 0.35, -1, 1);
+      py.current = clamp(-((e.clientY / innerHeight) * 2 - 1) + gyroPy * 0.35, -1, 1);
     };
+    const onTouchMove = (e) => {
+      const touch = e.touches && e.touches[0];
+      if (!touch) return;
+      px.current = clamp((touch.clientX / innerWidth) * 2 - 1 + gyroPx * 0.35, -1, 1);
+      py.current = clamp(-((touch.clientY / innerHeight) * 2 - 1) + gyroPy * 0.35, -1, 1);
+    };
+    const onOrientation = (e) => {
+      if (e.gamma == null || e.beta == null) return;
+      hasGyro = true;
+      gyroPx = clamp(e.gamma / 45, -1, 1) * 0.6;
+      gyroPy = clamp((e.beta - 45) / 45, -1, 1) * 0.5;
+      if (!hasMouseMoved.current) {
+        px.current = gyroPx;
+        py.current = gyroPy;
+      }
+    };
+    const onMotion = (e) => {
+      if (hasGyro) return;
+      const ag = e.accelerationIncludingGravity;
+      if (!ag || ag.x == null) return;
+      gyroPx = clamp(-ag.x / 10, -1, 1) * 0.5;
+      gyroPy = clamp(ag.y / 10, -1, 1) * 0.4;
+      if (!hasMouseMoved.current) {
+        px.current = gyroPx;
+        py.current = gyroPy;
+      }
+    };
+    const onScroll = () => {
+      const sy = scrollY / (document.documentElement.scrollHeight - innerHeight || 1);
+      py.current = clamp(py.current + (sy - 0.5) * 0.15, -1, 1);
+    };
+    const hasMouseMoved = { current: false };
+    const markMouse = () => { hasMouseMoved.current = true; };
     addEventListener("pointerdown", fire);
-    addEventListener("pointermove", move, { passive: true });
-    return () => { removeEventListener("pointerdown", fire); removeEventListener("pointermove", move); };
+    addEventListener("pointermove", onPointerMove, { passive: true });
+    addEventListener("pointermove", markMouse, { passive: true, once: true });
+    addEventListener("touchmove", onTouchMove, { passive: true });
+    addEventListener("deviceorientation", onOrientation, true);
+    addEventListener("devicemotion", onMotion, true);
+    addEventListener("scroll", onScroll, { passive: true });
+    const tryEnableGyro = () => {
+      const DOE = window.DeviceOrientationEvent;
+      if (DOE && typeof DOE.requestPermission === "function") {
+        DOE.requestPermission().then((state) => {
+          if (state === "granted") addEventListener("deviceorientation", onOrientation, true);
+        }).catch(() => {});
+      }
+    };
+    window.__enableGyroParallax = tryEnableGyro;
+    return () => {
+      removeEventListener("pointerdown", fire);
+      removeEventListener("pointermove", onPointerMove);
+      removeEventListener("touchmove", onTouchMove);
+      removeEventListener("deviceorientation", onOrientation, true);
+      removeEventListener("devicemotion", onMotion, true);
+      removeEventListener("scroll", onScroll);
+      delete window.__enableGyroParallax;
+    };
   }, []);
 
   const geoNear = useMemo(() => makeCloud(NEAR, 7, 12, 8, -4, 2), []);

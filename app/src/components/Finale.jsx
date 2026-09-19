@@ -4,6 +4,7 @@ import { CONFIG } from "../data/gifts";
 import { fanfare } from "../hooks/useAudio";
 import confetti from "canvas-confetti";
 import { Stepper } from "./GiftGrid";
+import { HeartIcon, SparklesIcon, EnvelopeOpenIcon, ShareIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
 
 const reduced = typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -11,12 +12,13 @@ function FallingHearts({ on }) {
   const hearts = useMemo(() => {
     if (!on || reduced) return [];
     const rand = (n) => (n * 9301 + 49297) % 233280 / 233280;
+    const icons = [HeartIcon, SparklesIcon, StarIcon, HeartIcon];
     return Array.from({ length: 16 }, (_, i) => ({
       left: rand(i + 1) * 100,
       delay: rand(i + 40) * 4,
       dur: 5 + rand(i + 80) * 4,
       s: 0.8 + rand(i + 120) * 1.2,
-      ch: ["💖", "💕", "✨", "🤍"][i % 4],
+      Icon: icons[i % icons.length],
     }));
   }, [on]);
   return (
@@ -26,12 +28,15 @@ function FallingHearts({ on }) {
           style={{ left: `${h.left}%`, fontSize: `${h.s}rem` }}
           animate={{ y: ["0vh", "115vh"], rotate: [0, 40, -30, 20, 0], opacity: [0, 1, 1, 0.9] }}
           transition={{ duration: h.dur, repeat: Infinity, delay: h.delay, ease: "linear" }}>
-          {h.ch}
+          <h.Icon className="h-6 w-6 text-pinky" />
         </motion.span>
       ))}
     </div>
   );
 }
+
+// Need to import StarIcon for FallingHearts
+import { StarIcon } from "@heroicons/react/24/solid";
 
 export default function Finale({ onReplay }) {
   const full = CONFIG.letter.join("\n\n");
@@ -75,7 +80,13 @@ export default function Finale({ onReplay }) {
         onClick={(e) => {
           confetti({ particleCount: 30, spread: 60, origin: { x: e.clientX / innerWidth, y: e.clientY / innerHeight }, colors: CONFIG.confettiColors });
           setTimeout(() => confetti({ particleCount: 20, spread: 100, origin: { x: e.clientX / innerWidth, y: e.clientY / innerHeight }, colors: CONFIG.confettiColors }), 120);
-        }}>🎉💖🎉</motion.button>
+        }}>
+        <span className="flex gap-1">
+          <SparklesIcon className="h-8 w-8 text-pinky" />
+          <HeartIcon className="h-8 w-8 text-pinky" />
+          <SparklesIcon className="h-8 w-8 text-pinky" />
+        </span>
+      </motion.button>
       <p className="eyebrow mt-3">The letter · For Laili</p>
       <h1 className="font-display font-bold text-ink leading-[1.05]" style={{ fontSize: "clamp(2rem,7vw,3.2rem)", textShadow: "0 0 34px rgba(217,79,140,.4)" }}>
         You found them <em className="text-pinky">all.</em>
@@ -85,7 +96,9 @@ export default function Finale({ onReplay }) {
           <motion.div key="env" exit={{ opacity: 0, scale: 0.9, y: -20 }}
             className="glass mt-5 rounded-[24px] p-8 w-[min(92vw,400px)] flex flex-col items-center">
             <motion.div className="text-7xl"
-              animate={{ y: [0, -8, 0], rotate: [0, -3, 3, 0] }} transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}>✉️</motion.div>
+              animate={{ y: [0, -8, 0], rotate: [0, -3, 3, 0] }} transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}>
+              <EnvelopeOpenIcon className="h-14 w-14 text-pinky" />
+            </motion.div>
             <p className="eyebrow mt-4">Unsealing your letter…</p>
             <motion.div className="mt-3 flex gap-1.5">
               {[0, 1, 2].map((i) => (
@@ -107,11 +120,15 @@ export default function Finale({ onReplay }) {
           </motion.div>
         )}
       </AnimatePresence>
-      <div className="text-plum/70 text-xs font-bold mt-2">tap the letter to skip typing ✏️</div>
+      <div className="text-plum/70 text-xs font-bold mt-2">tap the letter to skip typing <SparklesIcon className="inline h-4 w-4" /></div>
       <div className="mt-4 flex gap-3 flex-wrap justify-center">
         <motion.button onClick={share} className="btn-love !mt-0 !px-7 !py-2.5 !text-base"
-          whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>Share 💌</motion.button>
-        <button onClick={onReplay} className="font-display font-bold px-7 py-2.5 rounded-full border-2 border-pinkdeep/20 text-pinkdeep hover:border-pinky hover:text-pinky transition-colors">Replay ♡</button>
+          whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <ShareIcon className="inline h-5 w-5 mr-1" /> Share
+        </motion.button>
+        <button onClick={onReplay} className="font-display font-bold px-7 py-2.5 rounded-full border-2 border-pinkdeep/20 text-pinkdeep hover:border-pinky hover:text-pinky transition-colors">
+          <ArrowPathIcon className="inline h-5 w-5 mr-1" /> Replay
+        </button>
       </div>
     </motion.section>
   );

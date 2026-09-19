@@ -1,8 +1,30 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { 
+  GiftIcon, 
+  HeartIcon, 
+  ShoppingBagIcon, 
+  UserCircleIcon, 
+  BookOpenIcon,
+  CheckCircleIcon
+} from "@heroicons/react/24/solid";
 import { CONFIG } from "../data/gifts";
 import { winSound, startScratch, setScratchIntensity, stopScratch, scratchTick, revealSting, setMusicDuck } from "../hooks/useAudio";
 import confetti from "canvas-confetti";
+
+const GIFT_ICONS = [
+  GiftIcon,      // 🌷 - Bunga dalam tabung (gift box for flower in tube)
+  HeartIcon,     // 🤍 - Selimut lembut (heart for blanket)
+  ShoppingBagIcon, // 👜 - Pouch makeup
+  UserCircleIcon,  // 🤍 - Mukena (person for religious garment)
+  UserCircleIcon,  // 🧕 - Kerudung (person for headscarf)
+  BookOpenIcon,    // 📖 - Buku catatan
+];
+
+function getGiftIcon(index) {
+  const IconComponent = GIFT_ICONS[index] || GiftIcon;
+  return <IconComponent className="h-12 w-12 text-ink" />;
+}
 
 export default function ScratchModal({ index, onClose, onUnlock }) {
   const g = CONFIG.gifts[index];
@@ -113,7 +135,12 @@ export default function ScratchModal({ index, onClose, onUnlock }) {
           className="absolute top-3 right-3 w-11 h-11 rounded-full bg-pinkdeep/5 text-pinkdeep font-bold hover:bg-pinkdeep/10">✕</button>
         <p className="eyebrow">Keepsake No. {index + 1}</p>
         <h3 className="font-display font-bold text-ink text-2xl mt-1 pr-10">{g.title}</h3>
-        <p className="text-plum font-semibold text-sm mt-1 mb-2">{done ? `Seal broken — this one is yours. 🎉` : "Scratch the silver seal with your finger 👆"}</p>
+        <p className="text-plum font-semibold text-sm mt-1 mb-2">{done ? (
+          <>
+            <span>Seal broken — this one is yours.</span>
+            <CheckCircleIcon className="ml-2 h-4 w-4 text-green-500" />
+          </>
+        ) : "Scratch the silver seal with your finger 👆"}</p>
         {!done && (
           <div className="h-1.5 bg-pinkdeep/10 rounded-full overflow-hidden mb-3" aria-hidden="true">
             <div ref={progEl} className="h-full rounded-full bg-gradient-to-r from-[#ffd479] to-pinky" style={{ width: "0%" }} />
@@ -121,7 +148,9 @@ export default function ScratchModal({ index, onClose, onUnlock }) {
         )}
         <div className="relative w-full aspect-[1/1.05] rounded-[20px] overflow-hidden bg-gradient-to-br from-[#fff6fb] to-[#ffeef8] border-2 border-dashed border-pinky/40">
           <div className="absolute inset-0 flex flex-col items-center justify-center p-5 text-center gap-2">
-            <div className="text-6xl">{g.emoji}</div>
+            <div className="text-6xl">
+              {getGiftIcon(index)}
+            </div>
             <div className="font-display font-bold text-xl text-pinky">{g.title}</div>
             <div className="text-[.92rem] text-plum font-semibold leading-relaxed">{g.reason}</div>
           </div>
@@ -136,7 +165,10 @@ export default function ScratchModal({ index, onClose, onUnlock }) {
         </div>
         <div className="text-center mt-3 flex gap-2 justify-center items-center">
           {!done && <button onClick={finish} className="btn-ghost">Open directly</button>}
-          <button onClick={onClose} disabled={!done} className="btn-love !mt-0 !px-7 !py-2.5 !text-base">Keep it ✓</button>
+          <button onClick={onClose} disabled={!done} className="btn-love !mt-0 !px-7 !py-2.5 !text-base">
+            Keep it
+            <CheckCircleIcon className="ml-2 h-4 w-4" />
+          </button>
         </div>
       </motion.div>
     </motion.div>

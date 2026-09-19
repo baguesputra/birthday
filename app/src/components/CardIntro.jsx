@@ -1,11 +1,12 @@
 import { motion } from "framer-motion";
 import { popSound } from "../hooks/useAudio";
+import { EnvelopeOpenIcon, SparklesIcon, HeartIcon, StarIcon } from "@heroicons/react/24/solid";
 import { CONFIG } from "../data/gifts";
 
 const ORBITS = [
-  { s: 110, d: 9, delay: 0, ch: "✨" },
-  { s: 140, d: 12, delay: -4, ch: "💖" },
-  { s: 170, d: 15, delay: -8, ch: "✦" },
+  { s: 110, d: 9, delay: 0, Icon: SparklesIcon },
+  { s: 140, d: 12, delay: -4, Icon: HeartIcon },
+  { s: 170, d: 15, delay: -8, Icon: StarIcon },
 ];
 
 export default function CardIntro({ onStart }) {
@@ -18,12 +19,14 @@ export default function CardIntro({ onStart }) {
         initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }}
         transition={{ type: "spring", stiffness: 220, damping: 16 }}>
         <motion.div className="glass rounded-full w-20 h-20 flex items-center justify-center text-4xl relative z-10"
-          animate={{ y: [0, -8, 0] }} transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}>💌</motion.div>
+          animate={{ y: [0, -8, 0] }} transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}>
+          <EnvelopeOpenIcon className="h-10 w-10 text-pinky" />
+        </motion.div>
         {ORBITS.map((o, i) => (
           <motion.span key={i} className="absolute left-1/2 top-1/2 text-lg pointer-events-none"
             style={{ width: o.s, height: o.s, x: "-50%", y: "-50%" }}
             animate={{ rotate: 360 }} transition={{ duration: o.d, repeat: Infinity, ease: "linear", delay: o.delay }}>
-            <span className="absolute -top-2 left-1/2">{o.ch}</span>
+            <o.Icon className="absolute -top-2 left-1/2 h-6 w-6 text-pinky" />
           </motion.span>
         ))}
         <motion.div className="absolute inset-[-14px] -z-10 blur-xl rounded-full bg-pinky/25"
@@ -39,7 +42,7 @@ export default function CardIntro({ onStart }) {
           whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
           <motion.span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
             animate={{ x: ["-120%", "120%"] }} transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }} />
-          <span className="relative">See my gifts 🎈</span>
+          <span className="relative">See my gifts <SparklesIcon className="inline h-5 w-5 ml-1" /></span>
         </motion.button>
       </motion.div>
     </motion.section>

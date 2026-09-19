@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { popSound } from "../hooks/useAudio";
 import confetti from "canvas-confetti";
+import { GiftIcon } from "@heroicons/react/24/solid";
 import { CONFIG } from "../data/gifts";
 
 function GlowWord({ text, delay, className = "" }) {
@@ -20,7 +21,12 @@ function GlowWord({ text, delay, className = "" }) {
 }
 
 export default function Cover({ onOpen, musicStart }) {
+  const motionSupported = typeof window !== "undefined" && window.DeviceOrientationEvent && typeof window.DeviceOrientationEvent.requestPermission === "function";
+  const enableMotion = () => {
+    try { if (window.__enableGyroParallax) window.__enableGyroParallax(); } catch {}
+  };
   const open = () => {
+    enableMotion();
     musicStart(); popSound();
     confetti({ particleCount: 90, spread: 100, origin: { y: 0.35 }, colors: CONFIG.confettiColors });
     setTimeout(() => confetti({ particleCount: 40, angle: 60, spread: 60, origin: { x: 0, y: 0.6 }, colors: CONFIG.confettiColors }), 150);
@@ -44,8 +50,8 @@ export default function Cover({ onOpen, musicStart }) {
         <motion.button onClick={open} aria-label="Ketuk kado untuk membuka kejutan"
           animate={{ y: [0, -12, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
           whileHover={{ scale: 1.08, rotate: -3 }} whileTap={{ scale: 0.9 }}
-          className="relative text-[5.5rem] min-w-[88px] min-h-[88px] drop-shadow-[0_16px_30px_rgba(157,23,77,.3)]">
-          🎁
+          className="relative min-w-[88px] min-h-[88px] drop-shadow-[0_16px_30px_rgba(157,23,77,.3)] flex items-center justify-center">
+          <GiftIcon className="text-[5.5rem] text-pinky" />
         </motion.button>
         <motion.div className="absolute inset-[-18px] rounded-full border-2 border-pinky/40 pointer-events-none"
           animate={{ scale: [1, 1.35], opacity: [0.8, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }} />
@@ -56,6 +62,12 @@ export default function Cover({ onOpen, musicStart }) {
       </motion.div>
       <motion.p initial={{ opacity: 0 }} animate={{ opacity: 0.75 }} transition={{ delay: 1.5, duration: 0.5 }}
         className="mt-5 text-pinkdeep font-bold">Break the seal — tap the gift ✨</motion.p>
+      {motionSupported && (
+        <motion.button onClick={enableMotion} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.8 }}
+          className="mt-3 text-xs font-bold tracking-wide text-plum/70 underline decoration-dotted underline-offset-4">
+          Enable tilt ✨
+        </motion.button>
+      )}
     </motion.section>
   );
 }

@@ -9,7 +9,9 @@ button:focus-visible, [tabindex]:focus-visible { outline: 3px solid #D94F8C; out
 
 @layer components {
   .eyebrow { @apply text-[11px] font-bold tracking-[0.32em] uppercase text-pinkdeep/70; }
-  .stage { @apply fixed inset-0 z-10 flex flex-col items-center justify-center p-5 text-center max-w-[640px] mx-auto; }
+  .stage { @apply fixed inset-0 z-10 flex flex-col items-center justify-center text-center mx-auto overflow-y-auto; padding: clamp(14px,4vw,32px); padding-top: max(clamp(14px,4vw,32px), env(safe-area-inset-top)); padding-bottom: max(clamp(14px,4vw,32px), env(safe-area-inset-bottom)); max-width: min(640px, 92vw); min-height: 100dvh; -webkit-overflow-scrolling: touch; }
+  @media (min-width: 768px) { .stage { max-width: 720px; } }
+  @media (min-width: 1024px) { .stage { max-width: 760px; } }
   .glass { @apply bg-white/80 backdrop-blur-xl border border-white/70 shadow-card; }
   .btn-love { @apply font-display font-bold text-lg px-9 py-3.5 rounded-full text-white bg-gradient-to-br from-[#ff85c2] to-[#D94F8C] shadow-pop active:scale-[.96] transition-transform hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0; }
   .btn-ghost { @apply font-bold text-pinkdeep underline underline-offset-4 min-h-[44px] px-4 hover:text-pinky; }
@@ -17,7 +19,7 @@ button:focus-visible, [tabindex]:focus-visible { outline: 3px solid #D94F8C; out
 
 /* 3D gift box */
 .gift3d { perspective: 600px; width: 100%; display: flex; justify-content: center; }
-.gift3d-scene { position: relative; width: 96px; height: 96px; transform-style: preserve-3d; transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform 0.18s ease-out; }
+.gift3d-scene { position: relative; width: clamp(72px, 22vw, 96px); height: clamp(72px, 22vw, 96px); transform-style: preserve-3d; transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform 0.18s ease-out; }
 .gift3d-body { position: absolute; left: 10px; right: 10px; top: 26px; bottom: 8px; border-radius: 8px 8px 14px 14px;
   background: linear-gradient(160deg, #ff85c2, #D94F8C);
   box-shadow: 0 10px 22px -8px rgba(157, 23, 77, 0.5), inset 0 2px 0 rgba(255, 255, 255, 0.4); }

@@ -9,7 +9,6 @@ export const CONFIG = {
     { emoji: "🧕", title: "Kerudung", reason: "Karena aku ingin melihatmu tetap menjadi dirimu sendiri, dengan segala hal sederhana yang membuatmu cantik. Semoga setiap kali kamu memakainya, kamu merasa nyaman, percaya diri, dan selalu ingat bahwa ada seseorang yang ingin terus melihatmu bahagia." },
     { emoji: "📖", title: "Buku catatan", reason: "Karena perjalanan kita nanti akan punya banyak cerita. Ada rencana, impian, hal-hal kecil yang ingin diingat, bahkan mungkin daftar keinginan yang ingin kita wujudkan bersama. Jadi, biarkan halaman pertama menjadi awal dari banyak cerita berikutnya." },
   ],
-  box2: { answer: "LAILI", snacks: ["Lays", "Aqua", "Indomie", "Lemonilo", "Ichi Ocha"] },
   finaleTitle: "Untuk Sayang 🤍",
   letter: [
     "Selamat ulang tahun.",
